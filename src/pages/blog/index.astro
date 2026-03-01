@@ -1,0 +1,73 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+// Получаем посты и сразу сортируем их (новые сверху)
+const allPosts = await getCollection("blog");
+const sortedPosts = allPosts.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
+---
+
+<Layout title="Блог | Мои статьи">
+  <main>
+    <h1>Blog Posts</h1>
+    <p>Всего статей: {sortedPosts.length}</p>
+
+    <ul class="post-list">
+      {
+        sortedPosts.map((post) => (
+          <li class="post-item">
+            <a href={`/blog/${post.id}`}>
+              {/* Выводим заголовок из post.data */}
+              <h2>{post.data.title}</h2>
+            </a>
+
+            {post.data.date && (
+              <time datetime={post.data.date.toISOString()}>
+                {post.data.date.toLocaleDateString("ru-RU", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </time>
+            )}
+
+            <p>{post.data.description}</p>
+
+            <div class="tags">
+              {post.data.tags?.map((tag) => (
+                <span class="tag">#{tag} </span>
+              ))}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Layout>
+
+<style>
+  .post-list {
+    list-style: none;
+    padding: 0;
+  }
+  .post-item {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+  }
+  .post-item h2 {
+    margin: 0 0 0.5rem 0;
+    color: #007acc;
+  }
+  .tag {
+    font-size: 0.8rem;
+    color: #666;
+    margin-right: 10px;
+  }
+  time {
+    font-size: 0.9rem;
+    color: #888;
+  }
+</style>
